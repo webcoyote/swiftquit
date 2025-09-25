@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Run the project without building it
+set -Eeuo pipefail
+trap 'echo "${BASH_SOURCE[0]}: line $LINENO: $BASH_COMMAND: exitcode $?"' ERR
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/.."
+START_TIME=$(date +%s.%N)
+
+# Find the application
+APP_PATH=".DerivedData/Swift Quit/Build/Products/Debug/Swift Quit.app"
+if [[ ! -d "$APP_PATH" ]]; then
+    echo "❌ Could not find built app at: $APP_PATH"
+    echo "   Run 'scripts/build' first to build the app"
+    exit 1
+fi
+
+cp "$APP_PATH" "/Applications/" -rf
+open -a "$(basename "$APP_PATH")" "$@"
+
+END_TIME=$(date +%s.%N)
+ELAPSED_TIME=$(echo "$END_TIME - $START_TIME" | bc --mathlib | xargs printf "%.2f\n")
+echo "✅ Running in $ELAPSED_TIME seconds!"
