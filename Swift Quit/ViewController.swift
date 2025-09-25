@@ -18,6 +18,8 @@ class ViewController: NSViewController, NSTableViewDelegate, NSWindowDelegate {
     @IBOutlet weak var excludedAppsTableView: NSTableView!
     @IBOutlet weak var removeExcludedAppButtonOutlet: NSButton!
     @IBOutlet weak var launchAtLoginSwitch: NSSwitch!
+    @IBOutlet weak var closeDelayTextField: NSTextField!
+    @IBOutlet weak var closeDelayLabel: NSTextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,27 +38,40 @@ class ViewController: NSViewController, NSTableViewDelegate, NSWindowDelegate {
     func setupViews() {
         print("launch at login:")
         print(launchAtLogin)
-        
+
         if(swiftQuitSettings["menubarIconEnabled"] == "true"){
             displayMenubarIcon.state = NSControl.StateValue.on
         }
-        
+
         if(swiftQuitSettings["launchHidden"] == "true"){
             launchHiddenSwitch.state = NSControl.StateValue.on
         }
-        
+
         excludeBehaviourLabelOutlet.textColor = .labelColor
-        
+
         if(swiftQuitSettings["excludeBehaviour"] == "excludeApps"){
             excludeBehaviourPopupOutlet.title = "All Apps Except The Following"
         }
         else{
             excludeBehaviourPopupOutlet.title = "The Following Apps"
         }
-        
+
         excludedAppsTableView.dataSource = self
         excludedAppsTableView.delegate = self
-        
+
+        // Set the close delay value from settings
+        closeDelayTextField.stringValue = swiftQuitSettings["closeDelay"] ?? "2"
+    }
+
+    @objc func closeDelayChanged(_ sender: NSTextField) {
+        let value = sender.stringValue
+        // Validate that it's a positive number
+        if let intValue = Int(value), intValue > 0 {
+            SwiftQuit.setCloseDelay(value)
+        } else {
+            // Reset to previous value if invalid
+            sender.stringValue = swiftQuitSettings["closeDelay"] ?? "2"
+        }
     }
     
     @IBAction func launchAtLoginToggle(_ sender: Any) {

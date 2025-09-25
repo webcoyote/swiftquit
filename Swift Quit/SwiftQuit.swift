@@ -18,7 +18,7 @@ class SwiftQuit {
      */
     
     @objc class func getSettings() -> [String:String] {
-        return userDefaults.object(forKey: "SwiftQuitSettings") as? [String:String] ?? ["launchAtLogin":"false","menubarIconEnabled":"true","excludeBehaviour":"excludeApps","launchHidden":"true"]
+        return userDefaults.object(forKey: "SwiftQuitSettings") as? [String:String] ?? ["launchAtLogin":"false","menubarIconEnabled":"true","excludeBehaviour":"excludeApps","launchHidden":"true","closeDelay":"2"]
     }
     
     @objc class func updateSettings(){
@@ -69,7 +69,12 @@ class SwiftQuit {
         swiftQuitSettings["launchHidden"] = "false"
         updateSettings()
     }
-    
+
+    @objc class func setCloseDelay(_ delay: String){
+        swiftQuitSettings["closeDelay"] = delay
+        updateSettings()
+    }
+
     @objc class func activateAutomaticAppClosing(){
         swindler.on { (event: WindowDestroyedEvent) in
             if !event.window.application.knownWindows.isEmpty {
@@ -104,7 +109,8 @@ class SwiftQuit {
                         
                         print(applicationName)
                         
-                        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
+                        let closeDelay = Int(swiftQuitSettings["closeDelay"] ?? "2") ?? 2
+                        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(closeDelay)) {
                             if eventApp.knownWindows.isEmpty {
                                 terminateApplication(app: app)
                             }
